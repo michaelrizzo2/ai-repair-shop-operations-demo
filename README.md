@@ -1,149 +1,40 @@
-# AI Repair Shop Operations Demo
+# Repair desk
 
-An interactive portfolio project by Michael Rizzo, based on computer repair shop workflows and built exclusively with fictional business data.
+From a repair request to a reviewed next step. A portfolio starter by Michael Rizzo.
 
-**Status: project initialized. Application code, evaluations, and hosted demo are not yet available.**
+**Status: runnable local deterministic demo with synthetic data. Live API adapters and public hosting are not implemented.**
 
-[Portfolio](https://michaelrizzo2.github.io/#projects) · [Repository](https://github.com/michaelrizzo2/ai-repair-shop-operations-demo)
+[Portfolio](https://michaelrizzo2.github.io/#projects) · [Source](https://github.com/michaelrizzo2/ai-repair-shop-operations-demo)
 
-## What the demo will do
+## Implemented behavior
 
-A visitor selects a fictional repair request and watches the workflow run:
+The first complete workflow uses a structured preset intake, compatible synthetic inventory, integer-cent pricing, a response draft and session-bound approval. The SSE endpoint replays completed workflow events; it is not live model reasoning. All records, slots and prices are fictional. Sessions expire after 15 minutes and accept at most 30 workflows; a 500-session cap bounds in-memory state. Run a single server worker. There are no external connectors or model calls in this milestone.
 
-1. Extract the device, symptoms, and missing information into a validated schema.
-2. Query sandbox inventory and appointment tools.
-3. Calculate a provisional estimate using deterministic Python rules.
-4. Draft a customer response grounded in tool results.
-5. Require human approval before a simulated booking.
+## Run locally
 
-Example: “My laptop won’t charge. Can you give me a price and book a repair?” The system should request the device model before choosing a compatible part; a symptom alone is not a confirmed diagnosis.
-
-The interface will show concise workflow events, tool inputs and outputs, estimate line items, latency, and errors. It will not expose private model reasoning.
-
-## Planned architecture
-
-Browser UI → Python/FastAPI backend → structured AI extraction and response drafting → allowlisted sandbox tools. Python owns pricing, validation, permissions, and approval gates.
-
-Serve the HTML/CSS/JavaScript frontend from the same FastAPI application to simplify deployment. Stream workflow events with server-sent events (SSE). Start with one orchestrated workflow; add agents only when a specific task benefits from them.
-
-## Public demo data and boundaries
-
-- Use invented devices, inventory, prices, customers, and appointment slots; label all records as synthetic.
-- Never connect this public deployment to production email, customer records, billing, or calendars.
-- Keep AI credentials on the server in environment variables. Never put them in JavaScript, Git, screenshots, or logs.
-- Use isolated, expiring sessions. Bind simulated approval to the current session and proposed action.
-- Start with preset requests. If free-text input is added, tell visitors not to enter personal information and avoid retaining it.
-- Restrict tools to sandbox operations; validate model output and tool arguments.
-- Add request limits, input limits, model timeouts, output limits, and a usage budget before public launch.
-- Approval creates a fictional sandbox booking only; no real email is sent and no payment is taken.
-
-## Get the repository onto your computer
-
-Install Git and Python 3.11 or newer, then run:
+Python 3.11 or newer:
 
 ```bash
-git clone https://github.com/michaelrizzo2/ai-repair-shop-operations-demo.git
-cd ai-repair-shop-operations-demo
 python3 -m venv .venv
-source .venv/bin/activate
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pytest -q
+.venv/bin/python -m uvicorn app:app --host 127.0.0.1 --port 8011
 ```
 
-On Windows PowerShell, use `py -m venv .venv` and `.venv\Scripts\Activate.ps1` instead.
+Open http://127.0.0.1:8011. API documentation is at `/docs`; `/api/health` reports the active mode. Production dependencies alone are in `requirements.txt`. No credentials are needed or loaded for this deterministic milestone.
 
-Before adding credentials, create `.gitignore` containing:
+## Architecture
 
-```gitignore
-.env
-.env.*
-!.env.example
-.venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-*.log
-*.sqlite
-*.sqlite3
-```
+Browser → FastAPI validation → deterministic workflow/ranking/backtest → inspectable structured response.
 
-## Code to add next
+The application uses a small flat file layout: `app.py` contains the typed request schema and workflow; `ui.html`, `styles.css` and `ui.js` implement the interface; `test_app.py` exercises the important boundaries. This keeps the initial case study easy to clone and run.
 
-The following is the proposed structure, not files currently included in this repository:
+## Verification and limitations
 
-```text
-app/
-  __init__.py
-  main.py             # FastAPI app, frontend serving, health endpoint
-  schemas.py          # Validated request, estimate, and action schemas
-  workflow.py         # Intake → tools → estimate → draft → approval
-  tools.py            # Synthetic inventory and appointment tools
-  pricing.py          # Deterministic estimate calculations
-  static/
-    index.html
-    app.js
-    styles.css
-data/
-  inventory.json      # Invented records only
-  appointments.json
-evals/
-  cases.json          # Representative cases and expected outcomes
-tests/
-requirements.txt
-.env.example          # Variable names and placeholders only
-.gitignore
-README.md
-```
+Run the tests above. They verify input rejection, domain calculations and the specific decision boundaries, not model accuracy. Synthetic scenarios demonstrate behavior but do not establish real-world business impact or trading performance. No private customer records or credentials belong in this repository.
 
-First milestone: implement one complete charging-problem workflow with fictional inventory, an itemized estimate, and a simulated approval action. Begin with a deterministic mode that runs without credentials; label it clearly. Add a real model adapter afterward and identify the active mode in the UI.
+## Next milestone
 
-Once `requirements.txt` and `app/main.py` exist:
+Add a TypeSafe Choice adapter for routing plus independent Noul checks for missing information. Validate on labeled preset and adversarial cases. Add sandbox connector contracts and deliberate public-hosting limits before any real free-text model path.
 
-```bash
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload
-```
-
-Open `http://127.0.0.1:8000`. These commands will not run until the application files have been added. Keep optional model credentials in your local `.env` and ensure the application explicitly loads them; publish only placeholders in `.env.example`.
-
-## Push your code to GitHub
-
-From the cloned repository:
-
-```bash
-git status
-git add .gitignore .env.example requirements.txt app data evals tests README.md
-git diff --cached
-git commit -m "Build repair intake and estimate demo"
-git push origin main
-```
-
-Stage only paths that actually exist. Review the staged diff for credentials or real business data before committing. GitHub may ask you to authenticate with your configured Git credential manager or SSH setup.
-
-## Make the demo live and interactive
-
-The existing GitHub Pages portfolio can link to the application. Deploy the Python backend and its frontend as a web service; GitHub Pages does not run a Python server.
-
-After the code works locally:
-
-1. In Render, create a Web Service connected to this GitHub repository and the `main` branch.
-2. Choose Python as the runtime.
-3. Set build command: `pip install -r requirements.txt`.
-4. Set start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
-5. Add required environment variables in the hosting dashboard, never in committed files. Start in deterministic demo mode, then enable the model adapter after configuring usage limits.
-6. Deploy and test the hosted URL on desktop and mobile. Verify SSE events appear incrementally, sessions remain isolated, and failures display clearly.
-7. Add the verified URL here as **Live Demo**, and add both **Live Demo** and **Source Code** links to the portfolio project card.
-
-Select a hosting plan based on current pricing and whether cold starts are acceptable. Persistent demo records are unnecessary if each session uses temporary synthetic state.
-
-References: [Render FastAPI deployment](https://render.com/docs/deploy-fastapi), [GitHub Pages documentation](https://docs.github.com/en/pages/getting-started-with-github-pages).
-
-## Evidence to publish before calling it complete
-
-- Tests for estimate arithmetic, part compatibility, approval requirements, and session isolation.
-- Evaluation cases for missing model details, unavailable parts, unsupported requests, tool failures, and attempts to bypass approval.
-- Measured extraction accuracy, correct clarification/escalation rates, latency, and approximate model cost per run, with sample size and model configuration.
-- A short demo recording and architecture diagram.
-- Clear distinction between deterministic demo behavior and actual model behavior.
-
-## Immediate next step
-
-Clone the repository, add `.gitignore`, and build the first synthetic repair request → estimate → approval workflow.
+TypeSafe integration design follows the current [API](https://docs.typesafe.ai/api), [Python SDK](https://docs.typesafe.ai/sdk/python) and [composite scoring](https://docs.typesafe.ai/patterns/composite-scoring) documentation. Planned model behavior is not represented as implemented inference.
