@@ -1,14 +1,18 @@
 # Repair desk
 
-From a repair request to a reviewed next step. A portfolio starter by Michael Rizzo.
+From a repair request to a reviewed next step. A public engineering case study by Michael Rizzo.
 
-**Status: runnable local deterministic demo with synthetic data. Live API adapters and public hosting are not implemented.**
+**Public case study: tested Python implementation and an interactive browser demonstration using synthetic data. Live AI and external API adapters are not connected.**
 
-[Portfolio](https://michaelrizzo2.github.io/#projects) · [Source](https://github.com/michaelrizzo2/ai-repair-shop-operations-demo)
+[Portfolio](https://michaelrizzo2.github.io/#projects) · [Try the interactive demo](https://michaelrizzo2.github.io/#demo-repair) · [Source](https://github.com/michaelrizzo2/ai-repair-shop-operations-demo)
 
 ## Implemented behavior
 
 The first complete workflow uses a structured preset intake, compatible synthetic inventory, integer-cent pricing, a response draft and session-bound approval. The SSE endpoint replays completed workflow events; it is not live model reasoning. All records, slots and prices are fictional. Sessions expire after 15 minutes and accept at most 30 workflows; a 500-session cap bounds in-memory state. Run a single server worker. There are no external connectors or model calls in this milestone.
+
+## Public demonstration
+
+The linked GitHub Pages demo runs in JavaScript, with no install or credentials required. Its calculations, rankings and gate outcomes were checked against the Python implementation across 32 combined scenario/parameter cases. Browser approval illustrates the review step; the Python repair service owns session and proposal validation.
 
 ## Run locally
 
@@ -33,8 +37,8 @@ The application uses a small flat file layout: `app.py` contains the typed reque
 
 Run the tests above. They verify input rejection, domain calculations and the specific decision boundaries, not model accuracy. Synthetic scenarios demonstrate behavior but do not establish real-world business impact or trading performance. No private customer records or credentials belong in this repository.
 
-## Next milestone
+## Integration design
 
 Add a TypeSafe Choice adapter for routing plus independent Noul checks for missing information. Validate on labeled preset and adversarial cases. Add sandbox connector contracts and deliberate public-hosting limits before any real free-text model path.
 
-TypeSafe integration design follows the current [API](https://docs.typesafe.ai/api), [Python SDK](https://docs.typesafe.ai/sdk/python) and [composite scoring](https://docs.typesafe.ai/patterns/composite-scoring) documentation. Planned model behavior is not represented as implemented inference.
+TypeSafe integration design follows the current [API](https://docs.typesafe.ai/api), [Python SDK](https://docs.typesafe.ai/sdk/python) and [composite scoring](https://docs.typesafe.ai/patterns/composite-scoring) documentation. Model adapter design is separate from the demonstrated deterministic behavior.
