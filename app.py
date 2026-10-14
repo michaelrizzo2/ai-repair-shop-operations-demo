@@ -149,3 +149,10 @@ def approve(body: Approval, request: Request):
             raise HTTPException(409, 'This proposal was already approved.')
         session['approved'] = True
         return {'booking_id': 'fictional-' + secrets.token_hex(6), 'slot': result['slots'][0], 'message': 'Fictional booking approved. No real appointment, message or payment was created.'}
+
+# Explicit public evidence assets; never expose arbitrary project paths.
+@app.get('/{asset}')
+def evidence_asset(asset: str):
+    if asset not in ('demo-engine.js','jobs-data.json','eth-history.json','evaluation-results.json'):
+        raise HTTPException(404,'Asset not found')
+    return FileResponse(ROOT / asset)

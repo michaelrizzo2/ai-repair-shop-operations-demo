@@ -1,22 +1,28 @@
-# Repair desk
+# Repair shop operations
 
-From a repair request to a reviewed next step. A public engineering case study by Michael Rizzo.
+[Portfolio](https://michaelrizzo2.github.io/#projects) · [Try the case study](https://michaelrizzo2.github.io/#demo-repair)
 
-**Public case study: tested Python implementation and an interactive browser demonstration using synthetic data. Live AI and external API adapters are not connected.**
+A working TypeSafe integration for bounded **fictional** repair requests. `typesafe_adapter.py` validates Choice/Noul answers from pinned `jev-1.13.0`; code owns catalog lookup, integer-cent prices and human approval. `live_service.py` stores expiring sessions and budget counters in SQLite outside the checkout. Credentials remain server-side. Public live hosting is pending Tailscale Funnel activation; recorded model judgments and explicit offline examples are already usable.
 
-[Portfolio](https://michaelrizzo2.github.io/#projects) · [Try the interactive demo](https://michaelrizzo2.github.io/#demo-repair) · [Source](https://github.com/michaelrizzo2/ai-repair-shop-operations-demo)
+The server limits inference to 5 calls per 15-minute session, 90 global calls/day, 120,000 reserved/used input tokens/day, two concurrent calls, 600 characters and 8 KiB requests. Failed calls conservatively retain a 6,000-token reservation. It rejects foreign origins, malformed provider output and mismatched, stale or repeated approvals. The API key is read from `TYPESAFE_API_KEY` or the owner’s private `~/.config/typesafe-ai/api-key`; never commit it. CORS is a browser boundary, not authentication. Global budgets remain effective when anonymous visitors create new sessions.
 
-## Implemented behavior
+## Measured synthetic evaluation
 
-The first complete workflow uses a structured preset intake, compatible synthetic inventory, integer-cent pricing, a response draft and session-bound approval. The SSE endpoint replays completed workflow events; it is not live model reasoning. All records, slots and prices are fictional. Sessions expire after 15 minutes and accept at most 30 workflows; a 500-session cap bounds in-memory state. Run a single server worker. There are no external connectors or model calls in this milestone.
+48 hand-labeled requests were frozen before successful inference: 6 calibration, 42 holdout; thresholds fixed before inference and not tuned on the holdout. 42/42 workflow outcomes matched labels; keyword baseline 36/42. Zero incorrect approval-required outcomes in this small sample. Median API latency 189.82 ms; p95 257.75 ms; 34,609 input tokens; estimated provider cost $0.001453578 across 48 calls at $0.042/million input tokens, excluding hosting/gateway costs. Inspect `evaluation-cases.json`, `evaluation-results.json`, and `evaluate_live.py`. This is a workflow-quality benchmark, not customer savings, production accuracy or a safety guarantee. The initial integration check received HTTP 422 because Noul criteria used an incorrect shape; it was corrected before deployment, with frozen labels and thresholds unchanged.
 
-## Public demonstration
+## Live service locally
 
-The linked GitHub Pages demo runs in JavaScript, with no install or credentials required. Its calculations, rankings and gate outcomes were checked against the Python implementation across 32 combined scenario/parameter cases. Browser approval illustrates the review step; the Python repair service owns session and proposal validation.
+Install production dependencies, then run `.venv/bin/python -m uvicorn live_service:app --host 127.0.0.1 --port 8021`. `/api/health` exposes configuration status without secrets. POST `/api/session`, then `/api/live/run` with the ephemeral session token and fictional text. Only `/api/live/approve` can approve the current proposal. All bookings remain fictional. `/api/metrics` contains daily aggregates, not user text. Access logging is disabled in the installed user service.
 
-## Run locally
+A local user service named `portfolio-ai-demo.service` runs this backend persistently. The public gateway is **not enabled**. Tomorrow, the account owner can activate Funnel and publish only unused port 10000 to localhost:8021. Other Tailscale routes remain private. See `DEPLOYMENT.md` for exact steps.
 
-Python 3.11 or newer:
+## Limits
+
+No physical diagnosis, real inventory reservation, real customer data or business-system execution. Small synthetic coverage, anonymous budget-limited access, a single host with no uptime SLA and model/provider dependence. Request text goes to TypeSafe; this demo persists a hash, not raw request text. SQLite records proposal results and telemetry; no claim is made about provider retention policies.
+
+## Run and verify
+
+Python 3.11+:
 
 ```bash
 python3 -m venv .venv
@@ -25,20 +31,6 @@ python3 -m venv .venv
 .venv/bin/python -m uvicorn app:app --host 127.0.0.1 --port 8011
 ```
 
-Open http://127.0.0.1:8011. API documentation is at `/docs`; `/api/health` reports the active mode. Production dependencies alone are in `requirements.txt`. No credentials are needed or loaded for this deterministic milestone.
+Open http://127.0.0.1:8011. The shared browser workspace uses published evidence assets; enhanced Python APIs expose independent reproducible calculations. All four browser modes are included to make comparison easy; each repository’s own Python implementation is its named project. Repair live mode additionally needs the separately configured backend on 8021. No credentials are bundled in browser files.
 
-## Architecture
-
-Browser → FastAPI validation → deterministic workflow/ranking/backtest → inspectable structured response.
-
-The application uses a small flat file layout: `app.py` contains the typed request schema and workflow; `ui.html`, `styles.css` and `ui.js` implement the interface; `test_app.py` exercises the important boundaries. This keeps the initial case study easy to clone and run.
-
-## Verification and limitations
-
-Run the tests above. They verify input rejection, domain calculations and the specific decision boundaries, not model accuracy. Synthetic scenarios demonstrate behavior but do not establish real-world business impact or trading performance. No private customer records or credentials belong in this repository.
-
-## Integration design
-
-Add a TypeSafe Choice adapter for routing plus independent Noul checks for missing information. Validate on labeled preset and adversarial cases. Add sandbox connector contracts and deliberate public-hosting limits before any real free-text model path.
-
-TypeSafe integration design follows the current [API](https://docs.typesafe.ai/api), [Python SDK](https://docs.typesafe.ai/sdk/python) and [composite scoring](https://docs.typesafe.ai/patterns/composite-scoring) documentation. Model adapter design is separate from the demonstrated deterministic behavior.
+14 Python tests pass for this project. Portfolio tests and 45 enhanced Python/browser parity combinations validate the shared outputs. See `VALIDATION.md`.
