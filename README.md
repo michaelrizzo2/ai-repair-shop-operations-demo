@@ -2,7 +2,7 @@
 
 [Portfolio](https://michaelrizzo2.github.io/#projects) · [Try the case study](https://michaelrizzo2.github.io/#demo-repair)
 
-A working TypeSafe integration for bounded **fictional** repair requests. `typesafe_adapter.py` validates Choice/Noul answers from pinned `jev-1.13.0`; code owns catalog lookup, integer-cent prices and human approval. `live_service.py` stores expiring sessions and budget counters in SQLite outside the checkout. Credentials remain server-side. Public live hosting is pending Tailscale Funnel activation; recorded model judgments and explicit offline examples are already usable.
+A working TypeSafe integration for bounded **fictional** repair requests. `typesafe_adapter.py` validates Choice/Noul answers from pinned `jev-1.13.0`; code owns catalog lookup, integer-cent prices and human approval. `live_service.py` stores expiring sessions and budget counters in SQLite outside the checkout. Credentials remain server-side. Funnel now publishes only the bounded repair service on HTTPS port 10000. Recorded model judgments and explicit offline examples remain available when live access fails.
 
 The server limits inference to 5 calls per 15-minute session, 90 global calls/day, 120,000 reserved/used input tokens/day, two concurrent calls, 600 characters and 8 KiB requests. Failed calls conservatively retain a 6,000-token reservation. It rejects foreign origins, malformed provider output and mismatched, stale or repeated approvals. The API key is read from `TYPESAFE_API_KEY` or the owner’s private `~/.config/typesafe-ai/api-key`; never commit it. CORS is a browser boundary, not authentication. Global budgets remain effective when anonymous visitors create new sessions.
 
@@ -14,7 +14,7 @@ The server limits inference to 5 calls per 15-minute session, 90 global calls/da
 
 Install production dependencies, then run `.venv/bin/python -m uvicorn live_service:app --host 127.0.0.1 --port 8021`. `/api/health` exposes configuration status without secrets. POST `/api/session`, then `/api/live/run` with the ephemeral session token and fictional text. Only `/api/live/approve` can approve the current proposal. All bookings remain fictional. `/api/metrics` contains daily aggregates, not user text. Access logging is disabled in the installed user service.
 
-A local user service named `portfolio-ai-demo.service` runs this backend persistently. The public gateway is **not enabled**. Tomorrow, the account owner can activate Funnel and publish only unused port 10000 to localhost:8021. Other Tailscale routes remain private. See `DEPLOYMENT.md` for exact steps.
+A local user service named `portfolio-ai-demo.service` runs this backend persistently. The public gateway is enabled on port 10000 to localhost:8021. Public-relay inference and policy checks passed; both relay certificates validate. Independent phone and published-page browser access still need verification because Edge reports a client-side block. Other Tailscale routes remain private. See `DEPLOYMENT.md` for exact steps.
 
 ## Limits
 

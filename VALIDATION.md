@@ -11,3 +11,7 @@
 
 
 No physical diagnosis, real inventory reservation, real customer data or business-system execution. Small synthetic coverage, anonymous budget-limited access, a single host with no uptime SLA and model/provider dependence. Request text goes to TypeSafe; this demo persists a hash, not raw request text. SQLite records proposal results and telemetry; no claim is made about provider retention policies.
+
+## October 14 UI and HTTPS update
+
+Approved loading-state fix preserves actual asset-failure errors. Responsive chart geometry increases measured phone axis-text height from about 6px to 14px at390px, with no horizontal overflow. Shared JavaScript domain calculations are unchanged. The Funnel gateway is enabled only for repair port10000. Both public relay addresses pass TLS1.3 and certificate hostname/chain validation; independent phone evidence is still pending.

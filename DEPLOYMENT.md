@@ -1,8 +1,8 @@
 # Owner deployment checklist
 
-The local backend is installed as `~/.config/systemd/user/portfolio-ai-demo.service`. It listens only on 127.0.0.1:8021. Tailscale Funnel is currently disabled. Browser access to its activation page was declined; no account policy was changed.
+The local backend is installed as `~/.config/systemd/user/portfolio-ai-demo.service`. It listens only on 127.0.0.1:8021. The owner enabled Funnel on October 14, 2026. Public port 10000 is configured to proxy only this repair service. Existing Serve/RDP routes remain tailnet-only. The public relay passed live inference, session quota and single-use approval checks; both public DNS addresses now pass HTTPS hostname/chain validation with TLS 1.3. Edge currently reports a client-side address block; independent phone verification is still needed.
 
-Tomorrow:
+Deployment and verification checklist:
 
 1. Sign in to the Tailscale administrator account and use the activation link printed by the CLI, or follow https://tailscale.com/docs/features/tailscale-funnel#enable-funnel . Review the default scope: activation ordinarily permits all tailnet members to use Funnel. Limit the policy to the intended device/user if necessary.
 2. Confirm the local service is active: `systemctl --user is-active portfolio-ai-demo.service` . Check `http://127.0.0.1:8021/api/health` . It must report configured true without exposing any key.
